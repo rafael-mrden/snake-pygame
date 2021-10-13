@@ -10,17 +10,17 @@ class SnakeGame:
         
         # Game parameters
         self.background_color = 'white'
-        self.screen_width  = 20
-        self.screen_height = 20
+        self.screen_width  = 30
+        self.screen_height = 30
         self.scaling_factor = 20
 
         self.game_over_pause = 3 # seconds
         
         # Initial snake parameters
         self.initial_position = ( int(self.screen_width / 2), int(self.screen_height / 2) )
-        self.initial_length = 5
+        self.initial_length = 7
         self.initial_direction = (1, 0)
-        self.initial_speed = 5 # Pixel per seconds
+        self.initial_speed = 7 # Pixel per seconds
         self.speed_increment = 0.5
         #################
         
