@@ -189,7 +189,8 @@ class SnakeGame:
 
 
     def _self_drive(self):
-        '''Idea for now: locally minimize the distance (ignore the torus metric).'''
+        '''Idea for now: locally minimize the distance (in the torus metric).'''
+        
         for event in pygame.event.get():
             if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
                 quit()
