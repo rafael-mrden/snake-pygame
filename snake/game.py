@@ -31,7 +31,8 @@ class SnakeGame:
         
         self.snake = SnakeObject( self.initial_position, self.initial_length, self.initial_direction, self.initial_speed, self.speed_increment, self.screen_width, self.screen_height)
 
-        self.state = 'welcome' 
+        self.state = 'welcome'
+        self.auto = False # True = Self-driving snake - experimental
         self.score = 0 # Updates only on game_over
         
 
@@ -40,7 +41,12 @@ class SnakeGame:
             self.welcome()
 
         while self.state == 'game':
-            self._handle_input()
+            
+            if self.auto:
+                self._self_drive()
+            else:
+                self._handle_input()
+            
             self._process_game_logic()
             self._draw()
             
@@ -53,19 +59,25 @@ class SnakeGame:
 
         x_max, y_max = Vector2(self.screen.get_size())
         position1 = Vector2(x_max / 2, y_max / 4)
-        position2 = Vector2(x_max / 2, y_max / 2)
-        position3 = Vector2(x_max / 2, 3 * y_max / 4)
-        position4 = Vector2(x_max / 2, 3 * y_max / 4 + 30)
-        position5 = Vector2(x_max / 2, y_max / 4 + 40)
+        position2 = Vector2(x_max / 2, y_max / 4 + 40)
+        position3 = Vector2(x_max / 2, y_max / 2)
+        position4 = Vector2(x_max / 2, 3 * y_max / 4)
+        position5 = Vector2(x_max / 2, 3 * y_max / 4 + 30)
+        position6 = Vector2(x_max / 2, 3 * y_max / 4 + 60)
         
         self.screen.blit( *print_text("SNAKE", position1, "dark green", self.font(80)) )
-        self.screen.blit( *print_text("Play: 'Enter'", position3, "dark green", self.font(25)) )
-        self.screen.blit( *print_text("Exit: 'Esc'", position4, "dark green", self.font(25)) )
-        self.screen.blit( *print_text("by RM", position5, "dark green", self.font(15)) )
+        self.screen.blit( *print_text("by RM", position2, "dark green", self.font(15)) )
+        self.screen.blit( *print_text("Play: 'Enter'", position4, "dark green", self.font(25)) )
+        self.screen.blit( *print_text("Exit: 'Esc'", position5, "dark green", self.font(25)) )
+        self.screen.blit( *print_text("Auto: 'A'", position6, "dark green", self.font(25)) )
+        
         
         pygame.display.flip()
         
-        self.wait([K_KP_ENTER, K_RETURN]) # Wait for enter
+        input = self.wait([K_KP_ENTER, K_RETURN, K_a]) # Wait for enter
+        
+        if input == K_a:
+            self.auto = True
 
         self.state = 'game'
         
@@ -87,7 +99,43 @@ class SnakeGame:
             elif is_key_pressed[K_DOWN] and self.snake.direction != (0, -1):
                 self.snake.change_direction((0, 1))                 
 
-
+ 
+    def _self_drive(self):
+        '''Idea for now: locally minimize the distance (ignore the torus metric).'''
+        for event in pygame.event.get():
+            if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
+                quit()
+        
+        head = Vector2(self.snake.head())
+        direction = Vector2(self.snake.direction)
+        body = self.snake.body
+        food = Vector2(self.snake.food)
+       
+        current_distance = head.distance_squared_to(food)
+        
+        foods = [ food ] + [food + Vector2(v) for v in [(self.screen_width, 0), (-self.screen_width, 0), (0, self.screen_height), (0, -self.screen_height)]]
+        current_distance = head.distance_squared_to(food)
+        
+        directions = [ direction ] + [Vector2(v) for v in [(1, 0), (-1, 0), (0, 1), (0, -1)] if v not in [-direction, direction] ]
+        possibilities = [head + v for v in directions if head + v not in body]
+        
+        
+        for possibility in possibilities:
+            distance = possibility.distance_squared_to(food)
+            
+            if distance < current_distance:
+                direction = possibility - head
+                direction = tuple([int(x) for x in direction])
+                self.snake.change_direction(direction)
+                return
+        
+        if possibilities != []:
+            direction = possibilities[0] - head
+            direction = tuple([int(x) for x in direction])
+            self.snake.change_direction(direction)
+            return   
+            
+            
     def _process_game_logic(self):
         if self.snake:
             self.snake.move()
@@ -119,14 +167,14 @@ class SnakeGame:
 
         x_max, y_max = Vector2(self.screen.get_size())
         position1 = Vector2(x_max / 2, y_max / 4)
-        position2 = Vector2(x_max / 2, y_max / 2)
-        position3 = Vector2(x_max / 2, 3 * y_max / 4)
-        position4 = Vector2(x_max / 2, 3 * y_max / 4 + 30)
+        position3 = Vector2(x_max / 2, y_max / 2)
+        position4 = Vector2(x_max / 2, 3 * y_max / 4)
+        position5 = Vector2(x_max / 2, 3 * y_max / 4 + 30)
         
         self.screen.blit( *print_text("GAME OVER!", position1, "dark green", self.font(40)) )
-        self.screen.blit( *print_text(f"Score: {self.score}", position2, "dark green", self.font(30)) )
-        self.screen.blit( *print_text("Play: 'Enter'", position3, "dark green", self.font(25)) )
-        self.screen.blit( *print_text("Exit: 'Esc'", position4, "dark green", self.font(25)) )
+        self.screen.blit( *print_text(f"Score: {self.score}", position3, "dark green", self.font(30)) )
+        self.screen.blit( *print_text("Play: 'Enter'", position4, "dark green", self.font(25)) )
+        self.screen.blit( *print_text("Exit: 'Esc'", position5, "dark green", self.font(25)) )
         
         pygame.display.flip()
         
@@ -145,7 +193,7 @@ class SnakeGame:
                 if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
                     quit()
                 if event.type == KEYDOWN and event.key in list_of_keys:
-                    return
+                    return event.key
 
 
     def font(self, size):
