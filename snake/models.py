@@ -1,17 +1,22 @@
 from utils import *
-
+from pygame.math import Vector2
 
 class SnakeObject:
-    def __init__(self, initial_position, initial_length, initial_direction, initial_speed, speed_increment, screen_width, screen_height):
-        self.body = [(initial_position[0] - i, initial_position[1]) for i in reversed(range(initial_length))] 
-        self.direction = initial_direction
-        self.speed = initial_speed
-        self.speed_increment = speed_increment
-        self.screen_width = screen_width
-        self.screen_height = screen_height
+    def __init__(self, initial_snake_parameters, screen_parameters, color_parameters):
+        
+        x0, y0 = initial_snake_parameters['initial_position']
+        len0 = initial_snake_parameters['initial_length']
+        self.body = [(x0 - i, y0) for i in reversed(range(len0))] 
+        self.direction = initial_snake_parameters['initial_direction']
+        self.speed = initial_snake_parameters['initial_speed']
+        self.speed_increment = initial_snake_parameters['speed_increment']
+        self.screen_width = screen_parameters['width']
+        self.screen_height = screen_parameters['height']
+        self.color_parameters = color_parameters
         
         self.food = position_food(self.body, self.screen_width, self.screen_height)
-
+        
+        
     def head(self):
         return self.body[-1]
         
@@ -21,7 +26,7 @@ class SnakeObject:
     def move(self):
         head = self.head()
         direction = self.direction
-        new_head = ((head[0] + direction[0]) % self.screen_width, (head[1] + direction[1]) % self.screen_height)   # '%' here makes the snake return 
+        new_head = modulo(head[0] + direction[0], head[1] + direction[1], self.screen_width, self.screen_height)   
         self.body.append(new_head)
         
         if self.got_food():
@@ -46,8 +51,8 @@ class SnakeObject:
 
 
     def draw(self, surface):
-        surface.set_at(self.head(), 'green')
+        surface.set_at(self.head(), self.color_parameters['snake_head_color'])
         for point in self.body[:-1]:
-            surface.set_at(point, 'dark green')
+            surface.set_at(point, self.color_parameters['snake_color'])
 
-        surface.set_at(self.food, 'red')
+        surface.set_at(self.food, self.color_parameters['food_color'])

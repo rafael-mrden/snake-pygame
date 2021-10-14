@@ -12,9 +12,16 @@ def print_text(message, position, color, font):
 
 def position_food(exceptions, screen_width, screen_height):
     '''Chooses a random position for food.'''
+    
     while True:
         x = randint(0, screen_width - 1)
         y = randint(0, screen_height - 1)
         if (x,y) not in exceptions:
             return (x, y)
-        
+ 
+ 
+def modulo(x, y, screen_width, screen_height):
+    '''Makes coordinates small enough to appear on screen.'''
+    
+    return (int(x) % screen_width, int(y) % screen_height)
+    
