@@ -26,7 +26,7 @@ class SnakeObject:
     def move(self):
         head = self.head()
         direction = self.direction
-        new_head = modulo(head[0] + direction[0], head[1] + direction[1], self.screen_width, self.screen_height)   
+        new_head = modulo( Vector2(head) + Vector2(direction), self.screen_width, self.screen_height)   
         self.body.append(new_head)
         
         if self.got_food():

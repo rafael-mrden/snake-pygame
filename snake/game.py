@@ -25,7 +25,10 @@ class SnakeGame:
         }
 
         self.initial_snake_parameters = {
-            'initial_position' : ( int(self.screen_parameters['width'] / 2), int(self.screen_parameters['height'] / 2) ),
+            'initial_position' : (
+                int(self.screen_parameters['width'] / 2),
+                int(self.screen_parameters['height'] / 2)
+            ),
             'initial_length' : 7,
             'initial_direction' : (1, 0),
             'initial_speed' : 7, # Pixel per seconds
@@ -34,10 +37,17 @@ class SnakeGame:
         
         pygame.init()
         pygame.display.set_caption("Snake")
-        self.screen = pygame.display.set_mode((self.screen_parameters['width'] * self.screen_parameters['scaling_factor'], self.screen_parameters['height'] * self.screen_parameters['scaling_factor']))
+        self.screen = pygame.display.set_mode(
+            (self.screen_parameters['width'] * self.screen_parameters['scaling_factor'],
+            self.screen_parameters['height'] * self.screen_parameters['scaling_factor'])
+        )
         self.clock = pygame.time.Clock()
         
-        self.snake = SnakeObject(self.initial_snake_parameters, self.screen_parameters, self.color_parameters)
+        self.snake = SnakeObject(
+            self.initial_snake_parameters,
+            self.screen_parameters,
+            self.color_parameters
+        )
 
         self.state = 'welcome'
         self.auto = False # True = Self-driving snake - experimental
@@ -80,11 +90,9 @@ class SnakeGame:
         self.screen.blit( *print_text("Exit: 'Esc'", position5, color, self.font(25)) )
         self.screen.blit( *print_text("Auto: 'A'", position6, color, self.font(25)) )
         
-        
         pygame.display.flip()
         
         input = self.wait([K_KP_ENTER, K_RETURN, K_a]) # Wait for enter
-        
         if input == K_a:
             self.auto = True
 
@@ -107,51 +115,7 @@ class SnakeGame:
                 self.snake.change_direction((0, -1))                    
             elif is_key_pressed[K_DOWN] and self.snake.direction != (0, -1):
                 self.snake.change_direction((0, 1))                 
-
- 
-    def _self_drive(self):
-        '''Idea for now: locally minimize the distance (ignore the torus metric).'''
-        for event in pygame.event.get():
-            if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
-                quit()
         
-        head = Vector2(self.snake.head())
-        body = self.snake.body
-        direction = Vector2(self.snake.direction)
-        food = Vector2(self.snake.food)
-        
-        #new_direction = make_decision(head, body, direction, food)
-        
-        #self.snake.change_direction(new_direction)
-        #return   
-
-        current_distance = head.distance_squared_to(food)
-        
-        x = self.screen_parameters['width']
-        y = self.screen_parameters['height']
-        
-        foods = [ food ] + [food + Vector2(v) for v in [(x, 0), (-x, 0), (0, y), (0, -y)]]
-        current_distance = head.distance_squared_to(food)
-        
-        directions = [ direction ] + [Vector2(v) for v in [(1, 0), (-1, 0), (0, 1), (0, -1)] if v not in [-direction, direction] ]
-        possibilities = [head + v for v in directions if head + v not in body]
-        
-        
-        for possibility in possibilities:
-            distance = possibility.distance_squared_to(food)
-            
-            if distance < current_distance:
-                direction = possibility - head
-                direction = tuple([int(x) for x in direction])
-                self.snake.change_direction(direction)
-                return
-        
-        if possibilities != []:
-            direction = possibilities[0] - head
-            direction = tuple([int(x) for x in direction])
-            self.snake.change_direction(direction)
-            return   
-            
             
     def _process_game_logic(self):
         if self.snake:
@@ -169,7 +133,11 @@ class SnakeGame:
         self.screen.fill(self.color_parameters['background_color'])
 
         if self.snake:
-            self.snake_screen = pygame.Surface((self.screen_parameters['width'], self.screen_parameters['height']), pygame.SRCALPHA, 32)
+            self.snake_screen = pygame.Surface(
+                (self.screen_parameters['width'],
+                self.screen_parameters['height']),
+                pygame.SRCALPHA, 32)
+                
             self.snake.draw(self.snake_screen)
             self.screen.blit(pygame.transform.scale(self.snake_screen, self.screen.get_rect().size), (0, 0))
         
@@ -218,3 +186,24 @@ class SnakeGame:
         '''Produces pygame font, to be used by utils.print_text.'''
     
         return pygame.font.Font(None, size)
+
+
+    def _self_drive(self):
+        '''Idea for now: locally minimize the distance (ignore the torus metric).'''
+        for event in pygame.event.get():
+            if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
+                quit()
+        
+        head = self.snake.head()
+        body = self.snake.body
+        direction = self.snake.direction
+        food = self.snake.food
+        
+        new_direction = make_decision(
+            head, body, direction, food,
+            self.screen_parameters['width'], self.screen_parameters['height']
+        )
+        
+        self.snake.change_direction(new_direction)
+        return
+

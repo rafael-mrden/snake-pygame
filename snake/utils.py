@@ -1,5 +1,5 @@
 from random import randint
-
+from pygame.math import Vector2
 
 def print_text(message, position, color, font):
     '''Puts text on surface and returns it.'''
@@ -10,18 +10,63 @@ def print_text(message, position, color, font):
     return (text_surface, rect)
     
 
-def position_food(exceptions, screen_width, screen_height):
+def position_food(exceptions, sw, sh):
     '''Chooses a random position for food.'''
     
     while True:
-        x = randint(0, screen_width - 1)
-        y = randint(0, screen_height - 1)
+        x = randint(0, sw - 1)
+        y = randint(0, sh - 1)
         if (x,y) not in exceptions:
             return (x, y)
  
  
-def modulo(x, y, screen_width, screen_height):
+def modulo(point, sw, sh):
     '''Makes coordinates small enough to appear on screen.'''
+    x, y = point
+    return (int(x) % sw, int(y) % sh)
+
+
+def inverse_modulo(point, sw, sh):
+    translations = [Vector2(t) for t in [(sw, 0), (-sw, 0), (sw, sh), (-sw, -sh), (0, sh), (0, -sh), (sw, -sh), (-sw, sh)]]
+    return [point] + [point + t for t in translations]
     
-    return (int(x) % screen_width, int(y) % screen_height)
+    
+def torus_distance(point, food, sw, sh):
+    return min([point.distance_squared_to(food_) for food_ in inverse_modulo(food, sw, sh)])
+
+
+def make_decision(head, body, direction, food, sw, sh):
+    
+    head = Vector2(head)
+    direction = Vector2(direction)
+    food = Vector2(food)
+    
+    directions = [v for v in [Vector2(v_) for v_ in [(1, 0), (-1, 0), (0, 1), (0, -1)]] \
+                        if (v != -direction) and (modulo(head + v, sw, sh) not in body)]
+    
+    if directions == []: # Game over in the next step
+        return direction
+    
+    if len(directions) == 1: # No choice
+        return directions[0]
+    
+    current_distance = torus_distance(head, food, sw, sh)
+    
+    for v in directions:
+        if torus_distance(head + v, food, sw, sh) < current_distance:
+            return v
+        
+        
+        
+        
+        
+    return directions[randint(0, len(directions) - 1)]
+    
+    
+    
+    
+    
+    
+    
+    return direction
     
