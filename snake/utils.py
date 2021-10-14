@@ -1,4 +1,4 @@
-from random import randint
+from random import randint, shuffle
 from pygame.math import Vector2
 
 def print_text(message, position, color, font):
@@ -22,16 +22,20 @@ def position_food(exceptions, sw, sh):
  
 def modulo(point, sw, sh):
     '''Makes coordinates small enough to appear on screen.'''
+    
     x, y = point
     return (int(x) % sw, int(y) % sh)
 
 
 def inverse_modulo(point, sw, sh):
-    translations = [Vector2(t) for t in [(sw, 0), (-sw, 0), (sw, sh), (-sw, -sh), (0, sh), (0, -sh), (sw, -sh), (-sw, sh)]]
+    '''Returns the list of different neighbour coordinate representations of the same point on the torus.'''
+    
+    translations = [Vector2(t) for t in  [(sw, 0), (-sw, 0), (sw, sh), (-sw, -sh), (0, sh), (0, -sh), (sw, -sh), (-sw, sh)]]
     return [point] + [point + t for t in translations]
     
     
 def torus_distance(point, food, sw, sh):
+    
     return min([point.distance_squared_to(food_) for food_ in inverse_modulo(food, sw, sh)])
 
 
@@ -52,21 +56,14 @@ def make_decision(head, body, direction, food, sw, sh):
     
     current_distance = torus_distance(head, food, sw, sh)
     
+    # shuffle(directions) To many edges with this option.
     for v in directions:
         if torus_distance(head + v, food, sw, sh) < current_distance:
             return v
-        
-        
-        
-        
-        
+    
+    # TODO: Make better decisions by observing the connected components
+    # of the graph obtained from the complement of the snake's body.
+    
     return directions[randint(0, len(directions) - 1)]
-    
-    
-    
-    
-    
-    
-    
-    return direction
+
     
