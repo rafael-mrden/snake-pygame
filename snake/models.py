@@ -1,5 +1,5 @@
 from utils import *
-from pygame.math import Vector2
+
 
 class SnakeObject:
     def __init__(self, initial_snake_parameters, screen_parameters, color_parameters):

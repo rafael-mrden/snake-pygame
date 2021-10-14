@@ -1,6 +1,6 @@
 import pygame
-from pygame.math import Vector2
 from pygame.locals import *
+from pygame.math import Vector2
 
 from models import SnakeObject
 from utils import *
