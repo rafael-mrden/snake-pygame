@@ -106,7 +106,6 @@ def make_decision(head, body, direction, food, sw, sh):
         new_head = Vector2(modulo(head + v, sw, sh))
 
         directions_length_component[i] = len(nx.node_connected_component(complement_graph, modulo(new_head, sw, sh)))   
-        print(f'calculated component: {directions_length_component[i]}')
         
     max_length = max(directions_length_component.values())
     indices_with_max_length = [i for i in range(len(directions)) if directions_length_component[i] == max_length]
