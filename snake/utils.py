@@ -40,6 +40,19 @@ def torus_distance(point, food, sw, sh):
     return min([point.distance_squared_to(food_) for food_ in inverse_modulo(food, sw, sh)])
 
 
+def make_graph(body, sw, sh):
+    '''Makes graph from the complement of the body of the snake.'''
+    
+    vertices = [(i,j) for i in range(sw) for j in range(sh) if (i,j) not in body]
+    
+    edges = { v : [ modulo(Vector2(v) + Vector2(d), sw, sh) for d in [(1, 0), (-1, 0), (0, 1), (0, -1)] \
+                if modulo(Vector2(v) + Vector2(d), sw, sh) not in body] \
+                    for v in vertices }
+    
+    G = nx.Graph(edges)
+    return G
+
+
 def make_decision(head, body, direction, food, sw, sh):
     '''Where should snake make the next step.
     Many small optimizations are possible.'''
@@ -79,26 +92,26 @@ def make_decision(head, body, direction, food, sw, sh):
         
         directions_open_path[i] = open_path
     
-    restricted_possibilities = [v for v in directions if directions_open_path[directions.index(v)] == True]
-    
-    if restricted_possibilities != []:
-        return restricted_possibilities[0]
-    
-    else:
-        return directions[randint(0, len(directions) - 1)]
+    restricted_directions = [v for v in directions if directions_open_path[directions.index(v)] == True]
 
+    if restricted_directions != []:
+        return restricted_directions[0]
+    
+    # Here we know that none of the directions will lead to the food's connected component.
+    # So we choose a directions which leads to the largest connected component.
+    directions_length_component = {}
+    
+    for i in range(len(directions)):
+        v = directions[i]
+        new_head = Vector2(modulo(head + v, sw, sh))
 
-def make_graph(body, sw, sh):
-    '''Makes graph from the complement of the body of the snake.'''
+        directions_length_component[i] = len(nx.node_connected_component(complement_graph, modulo(new_head, sw, sh)))   
+        print(f'calculated component: {directions_length_component[i]}')
+        
+    max_length = max(directions_length_component.values())
+    indices_with_max_length = [i for i in range(len(directions)) if directions_length_component[i] == max_length]
     
-    vertices = [(i,j) for i in range(sw) for j in range(sh) if (i,j) not in body]
-    
-    edges = { v : [ modulo(Vector2(v) + Vector2(d), sw, sh) for d in [(1, 0), (-1, 0), (0, 1), (0, -1)] \
-                if modulo(Vector2(v) + Vector2(d), sw, sh) not in body] \
-                    for v in vertices }
-    
-    G = nx.Graph(edges)
-    return G
+    return directions[indices_with_max_length[0]]
     
 
 def an_obvious_boring_solution(head, body, direction, food, sw, sh):
