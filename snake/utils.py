@@ -41,6 +41,8 @@ def torus_distance(point, food, sw, sh):
 
 
 def make_decision(head, body, direction, food, sw, sh):
+    '''Where should snake make the next step.
+    Many small optimizations are possible.'''
     
     head = Vector2(head)
     direction = Vector2(direction)
