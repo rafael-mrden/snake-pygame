@@ -44,6 +44,8 @@ def make_decision(head, body, direction, food, sw, sh):
     '''Where should snake make the next step.
     Many small optimizations are possible.'''
     
+    #return an_obvious_boring_solution(head, body, direction, food, sw, sh)
+    
     head = Vector2(head)
     direction = Vector2(direction)
     food = Vector2(food)
@@ -99,4 +101,22 @@ def make_graph(body, sw, sh):
     return G
     
 
+def an_obvious_boring_solution(head, body, direction, food, sw, sh):
+    # Assumes that initial_direction is (1, 0)
     
+    initial_direction = (1, 0)
+    othogonal_direction = initial_direction[::-1]
+    
+    if direction == othogonal_direction:
+        return initial_direction
+    
+    if direction == initial_direction:
+        new_head = modulo(Vector2(head) + Vector2(initial_direction), sw, sh)
+        if new_head in body or \
+            (len(body) < sw and head[0] == 0):
+            return othogonal_direction
+        
+        else:
+            return initial_direction
+
+
