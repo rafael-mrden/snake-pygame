@@ -4,6 +4,8 @@ from pygame.math import Vector2
 
 from models import SnakeObject
 from utils import *
+from datetime import datetime
+
 
 class SnakeGame:
     def __init__(self):
@@ -162,6 +164,8 @@ class SnakeGame:
         self.screen.blit( *print_text("Play: 'Enter'", position4, color, self.font(25)) )
         self.screen.blit( *print_text("Exit: 'Esc'", position5, color, self.font(25)) )
         
+        self.log()
+        
         pygame.display.flip()
         
         self.wait([K_KP_ENTER, K_RETURN])
@@ -170,7 +174,13 @@ class SnakeGame:
         snake = SnakeGame()
         snake.main_loop()
 
-
+    def log(self):
+        filename = 'log.txt'
+        record = str(datetime.now()) + (', cpu:  ' if self.auto else ', user: ') + str(self.score) + '\n'
+        with open(filename, 'a+') as file:
+            file.write(record)
+    
+    
     def wait(self, list_of_keys):
         '''Waits for keyboard input'''
     

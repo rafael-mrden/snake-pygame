@@ -1,6 +1,6 @@
 snake.shortcut*
 /snake/__pycache__
-score*
+scores_v*
 *.r
 *.Rhistory
 score_statistics.png
